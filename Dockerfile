@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:latest
 MAINTAINER Alex Forsythe
 
 # Install Applications
@@ -11,11 +11,12 @@ RUN apt-get update && apt-get install -y \
   libtiff5-dev \
   pkg-config \
   zlib1g-dev \
-  libilmbase-dev \ 
-  libopenexr-dev
-  
+  libilmbase-dev=2.2.* \
+  libopenexr-dev=2.2.* \
+  && rm -rf /var/lib/apt/lists/*
+
 # Clone Git Repositories
-RUN mkdir src && cd /src \ 
+RUN mkdir src && cd /src \
   && git clone https://github.com/ampas/aces_container.git \
   && git clone https://github.com/ampas/ctl.git \
   && git clone https://github.com/ampas/aces-dev.git
@@ -25,7 +26,7 @@ ENV LD_LIBRARY_PATH /usr/local/lib
 ENV CTL_MODULE_PATH /src/aces-dev/transforms/ctl/lib
 
 # ACES Container
-RUN cd /src/aces_container \ 
+RUN cd /src/aces_container \
   && mkdir build \
   && cd build \
   && cmake .. \
@@ -39,8 +40,8 @@ RUN cd /src/ctl \
   && cmake -Wno-dev .. \
   && make \
   && make install
-  
+
 # Create a soft link to make ctlrender commands shorter
 RUN ln -s /src/aces-dev/transforms/ctl/ /ctl
 
-CMD ["/bin/bash"]
+ENTRYPOINT ["ctlrender", "params"]
